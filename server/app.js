@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const app = express();
 
-dotenv.config({path: './config.env'})
+dotenv.config({ path: './config.env' })
 require('./db/conn')
 // const User = require('./model/userSchema')
 
@@ -11,7 +11,7 @@ app.use(express.json())
 
 app.use(require("./router/auth"));
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
 // const middleware = (req, res, next) => {
 //     // app.use(express.json());
@@ -45,3 +45,11 @@ app.get('/signup', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running at port no: ${PORT}`);
 })
+
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static("client/build"));
+    const path = require("path");
+    app.get("*", (req, res) => {
+        res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+    })
+}
