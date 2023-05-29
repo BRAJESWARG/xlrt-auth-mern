@@ -67,8 +67,8 @@ const userSchema = new mongoose.Schema({
     ]
 });
 
-userSchema.pre('save', function (next) {
-    if (this.isModified) {
+userSchema.pre('save', async function (next) {
+    if (this.isModified('password')) {
         this.password = bcrypt.hashSync(this.password, 8);
         this.cpassword = bcrypt.hashSync(this.password, 8);
     }
@@ -77,7 +77,7 @@ userSchema.pre('save', function (next) {
 
 userSchema.methods.generateAuthToken = async function () {
     try {
-        const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET);
+        let token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET);
         this.tokens = this.tokens.concat({ token: token });
         await this.save();
         return token;
@@ -88,7 +88,7 @@ userSchema.methods.generateAuthToken = async function () {
 
 }
 
-userSchema.method.addMessage = async function (name, email, phone, subject, message) {
+userSchema.methods.addMessage = async function (name, email, phone, subject, message) {
     try {
         this.messages = this.messages.concat({name, email, phone, subject, message});
         await this.save();

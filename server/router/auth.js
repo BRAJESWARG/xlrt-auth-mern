@@ -94,17 +94,25 @@ router.post('/signin', async (req, res) => {
         if (userLogin) {
 
             const isMatch = await bcrypt.compare(password, userLogin.password);
-            token = await userLogin.generateAuthToken();
+            // token = await userLogin.generateAuthToken();
 
-            res.cookie("jwtoken", token, {
-                expires: new Date(Date.now() + 25892000000),
-                httpOnly: true
-            });
+            // res.cookie("jwtoken", token, {
+            //     expires: new Date(Date.now() + 25892000000),
+            //     httpOnly: true
+            // });
 
             if (!isMatch) {
                 res.status(400).json({ error: "Invalid Credintials! pass" });
             }
             else {
+
+                token = await userLogin.generateAuthToken();
+
+                res.cookie("jwtoken", token, {
+                    expires: new Date(Date.now() + 25892000000),
+                    httpOnly: true
+                });
+
                 res.json({ message: "User SignIn Successfull!" });
                 // return res.json({ message: "User SignIn Successfully!" });
 
@@ -138,7 +146,7 @@ router.post('/contact', authenticate, async (req, res) => {
             console.log("Error in contact form!");
             return res.status(400).json({ error: "Please fill the field properly!" });
         }
-        const userContact = User.findOne({ _id: req.userID });
+        const userContact = await User.findOne({ _id: req.userID });
         if (userContact) {
             const userMessage = await userContact.addMessage(name, email, phone, message, subject);
             await userContact.save();
@@ -155,7 +163,8 @@ router.post('/contact', authenticate, async (req, res) => {
 });
 
 router.get('/signout', (req, res) => {
-    res.clearCookie('jwtoken', {path: '/'});
+    console.log(`Hello my Logout Page`);
+    res.clearCookie('jwtoken', { path: '/' });
     console.log('Hello Sign Out world!');
     res.status(200).send("Sign Out!");
 });
